@@ -1,0 +1,20 @@
+[formatter.python]
+command = "ruff"
+options = ["format"]
+includes = ["*.py"]
+
+
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = [
+  "*.css",
+  "*.html",
+  "*.js",
+  "*.json",
+  "*.jsx",
+  "*.md",
+  "*.mdx",
+  "*.scss",
+  "*.ts",
+]
