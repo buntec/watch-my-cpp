@@ -36,6 +36,7 @@ from lib import (
     extract_diagnostic,
     extract_include_paths,
     find_clang_tidy,
+    find_cppcheck,
     find_include_what_you_use,
     is_relevant_header,
 )
@@ -66,6 +67,8 @@ CLANG_TIDY_EXECUTABLE = find_clang_tidy()
 
 IWYU_EXECUTABLE = find_include_what_you_use()
 
+CPPCHECK_EXECUTABLE = find_cppcheck()
+
 
 class Settings(BaseSettings):
     compile_commands_path: str = ""
@@ -77,6 +80,7 @@ class Settings(BaseSettings):
     verbosity: int = 0
     clang_tidy: bool = False
     iwyu: bool = False
+    cppcheck: bool = False
 
     model_config = SettingsConfigDict(env_prefix="wmcpp_")
 
@@ -101,6 +105,7 @@ class MsgCompile:
     file: str
     force_clang_tidy: bool = False
     force_iwyu: bool = False
+    force_cppcheck: bool = False
 
 
 class NotificationKind(StrEnum):
@@ -231,6 +236,9 @@ async def handle_client_actions():
             case {"type": "toggle_iwyu"}:
                 settings.iwyu = not settings.iwyu
                 ev_settings_change.set()
+            case {"type": "toggle_cppcheck"}:
+                settings.cppcheck = not settings.cppcheck
+                ev_settings_change.set()
             case {"type": "recompile_file", "file": file}:
                 logger.info(f"recompile file action received for {file}")
                 if file not in set_compile:
@@ -244,6 +252,10 @@ async def handle_client_actions():
                 logger.info(f"recompile file action (+ iwyu) received for {file}")
                 set_compile.add(file)
                 await q_compile.put(MsgCompile(file, force_iwyu=True))
+            case {"type": "recompile_file_and_force_cppcheck", "file": file}:
+                logger.info(f"recompile file action (+ cppcheck) received for {file}")
+                set_compile.add(file)
+                await q_compile.put(MsgCompile(file, force_cppcheck=True))
             case {"type": "kill_switch"}:
                 ev_kill_switch.set()
             case {"type": "num_workers_change", "n": n}:
@@ -533,6 +545,54 @@ async def worker(index: int):
                         diag.file_short = compress_path(diag.file)
                     diags.append(diag)
 
+        if CPPCHECK_EXECUTABLE and (settings.cppcheck or msg.force_cppcheck):
+            # construct bogus compile_commands.json for a single source file
+            # so that we can invoke cppcheck on it using the --project flag
+            cc = [
+                {
+                    "command": state.commands[file],
+                    "directory": state.common_prefix,
+                    "file": file,
+                    "output": f"{file}.out",
+                }
+            ]
+
+            with tempfile.TemporaryDirectory() as tmpdir:
+                cc_path = os.path.join(tmpdir, "compile_commands.json")
+                with open(cc_path, mode="w") as f:
+                    f.write(json.dumps(cc))
+
+                cmd = f"{CPPCHECK_EXECUTABLE} --project={cc_path} --enable=all --inconclusive --suppress=missingIncludeSystem"
+
+                logger.debug(f"running cppcheck command: {cmd}")
+
+                t0 = time.perf_counter()
+
+                proc = await asyncio.create_subprocess_shell(
+                    cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                )
+
+                stdout_b, stderr_b = await proc.communicate()
+
+                t1 = time.perf_counter()
+
+                dt = t1 - t0
+
+                logger.debug(f"worker-{index}: done cppcheck of {file} in {dt} seconds")
+
+                stderr: str = stderr_b.decode()
+                stdout: str = stdout_b.decode()
+
+                logger.debug(f"cppcheck stdout: {stdout}")
+                logger.debug(f"cppcheck stderr: {stderr}")
+
+            for line in stderr.splitlines():
+                diag = extract_diagnostic(line, DiagnosticSource.CPPCHECK)
+                if diag:
+                    diag.file = os.path.relpath(diag.file, state.common_prefix)
+                    diag.file_short = compress_path(diag.file)
+                    diags.append(diag)
+
         if CLANG_TIDY_EXECUTABLE and (settings.clang_tidy or msg.force_clang_tidy):
             t0 = time.perf_counter()
 
@@ -664,6 +724,11 @@ def init_state(temp_dir: str):
         logger.info(f"using include-what-you-use executable: {IWYU_EXECUTABLE}")
     else:
         logger.warning("include-what-you-use executable not found")
+
+    if CPPCHECK_EXECUTABLE:
+        logger.info(f"using cppcheck executable: {CPPCHECK_EXECUTABLE}")
+    else:
+        logger.warning("cppcheck executable not found")
 
     # for every source file do the following:
     # - remove common path prefix

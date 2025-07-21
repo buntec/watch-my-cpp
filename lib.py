@@ -19,6 +19,7 @@ class DiagnosticSource(StrEnum):
     COMPILER = "compiler"
     CLANG_TIDY = "clang-tidy"
     IWYU = "IWYU"
+    CPPCHECK = "cppcheck"
 
 
 @dataclass
@@ -67,6 +68,25 @@ def find_include_what_you_use():
     iwyu_path = shutil.which("include-what-you-use")
     if iwyu_path:
         return os.path.realpath(iwyu_path)
+
+    return None
+
+
+def find_cppcheck():
+    """Find cppcheck executable and return its full pathname."""
+    env_cppcheck_path = os.environ.get("CPPCHECK_BINARY")
+    if env_cppcheck_path:
+        return os.path.realpath(env_cppcheck_path)
+
+    # Search in same dir as this script.
+    cppcheck_path = shutil.which("cppcheck", path=os.path.dirname(__file__))
+    if cppcheck_path:
+        return os.path.realpath(cppcheck_path)
+
+    # Search the system PATH.
+    cppcheck_path = shutil.which("cppcheck")
+    if cppcheck_path:
+        return os.path.realpath(cppcheck_path)
 
     return None
 
@@ -136,7 +156,7 @@ def extract_diagnostic(line: str, source: DiagnosticSource) -> Diagnostic | None
     # line = "t.c:3:11: warning: conversion specifies type 'char *' but the argument has type 'int' [-Wformat,Format String]"
 
     # Regular expression to capture file, line, column, level, message, and category
-    pattern = re.compile(r"^(.*?):(\d+):(\d+):\s+(\w+):\s+(.*?)(?:\s+\[(-[^\]]+)\])?$")
+    pattern = re.compile(r"^(.*?):(\d+):(\d+):\s+(\w+):\s+(.*?)(?:\s+\[([^\]]+)\])?$")
 
     match = pattern.match(line)
     if match:

@@ -24,11 +24,27 @@
 }
 
 .note {
-  color: var(--sl-color-primary-700);
+  color: var(--sl-color-sky-700);
+}
+
+.information {
+  color: var(--sl-color-pink-700);
 }
 
 .ok {
   color: var(--sl-color-green-700);
+}
+
+.style {
+  color: var(--sl-color-fuchsia-700);
+}
+
+.performance {
+  color: var(--sl-color-indigo-700);
+}
+
+.portability {
+  color: var(--sl-color-cyan-700);
 }
 
 .sourcepath.error {

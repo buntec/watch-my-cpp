@@ -5,11 +5,11 @@ import { useState, useEffect, useReducer, useRef } from "preact/hooks";
 import lodash from "lodash";
 
 // helper for notifications
-function escapeHtml(html) {
-  const div = document.createElement("div");
-  div.textContent = html;
-  return div.innerHTML;
-}
+// function escapeHtml(html) {
+//   const div = document.createElement("div");
+//   div.textContent = html;
+//   return div.innerHTML;
+// }
 
 // custom function to emit shoelace toast notifications
 async function notify(
@@ -471,13 +471,30 @@ function App() {
       >
     `;
 
+    const ButtonRecompileForceCppCheck = html`
+      <sl-tooltip content="cppcheck">
+        <sl-button
+          size="small"
+          outline
+          onClick=${(e) => {
+            e.stopPropagation();
+            sendJsonMessage({
+              type: "recompile_file_and_force_cppcheck",
+              file: file,
+            });
+          }}
+          >🕵️</sl-button
+        ></sl-tooltip
+      >
+    `;
+
     const ButtonToClipboard = html`<sl-copy-button
       value=${file}
     ></sl-copy-button>`;
 
     const UserActions = html` <div class="user-actions">
       ${ButtonToClipboard} ${ButtonRecompile} ${ButtonRecompileForceClangTidy}
-      ${ButtonRecompileForceIWYU}
+      ${ButtonRecompileForceCppCheck} ${ButtonRecompileForceIWYU}
     </div>`;
 
     const unfoldDiags =
@@ -675,6 +692,20 @@ function App() {
     </sl-tooltip>
   `;
 
+  const ToggleCppCheck = html`
+    <sl-tooltip
+      content="Warning: enabling cppcheck may slow down compilation dramatically!"
+    >
+      <sl-switch
+        disabled=${state.status?.settings ? null : true}
+        checked=${state.status?.settings?.clang_tidy}
+        onsl-change=${() => sendJsonMessage({ type: "toggle_cppcheck" })}
+        size="small"
+        >Cppcheck
+      </sl-switch>
+    </sl-tooltip>
+  `;
+
   const CompileCommandsInfo =
     state.status?.settings?.compile_commands_path &&
     html`
@@ -732,8 +763,9 @@ function App() {
           toggleShowDiagnostics=${() =>
             dispatch({ type: "toggle_show_diagnostics" })}
         />
-        ${ToggleClangTidy} ${ToggleIWYU} ${Controls} ${KillSwitch}
-        ${CompileCommandsInfo} ${ExcludePatternsInfo} ${IncludePatternsInfo}
+        ${ToggleClangTidy} ${ToggleCppCheck} ${ToggleIWYU} ${Controls}
+        ${KillSwitch} ${CompileCommandsInfo} ${ExcludePatternsInfo}
+        ${IncludePatternsInfo}
       </div>
       ${GridMain}
     </div>
