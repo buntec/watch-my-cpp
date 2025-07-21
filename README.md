@@ -19,3 +19,5 @@ See the ccache [docs](https://ccache.dev/manual/4.11.3.html#_configuration)
 for configuration options.
 
 Works with Clang and GCC on macOS and Linux. Tested on Firefox and Chrome.
+
+![Screenshot on Firefox/Gnome](/screenshots/screenshot-firefox-gnome.png?raw=true)
