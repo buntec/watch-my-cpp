@@ -35,6 +35,16 @@ async function notify(
   await alert.toast();
 }
 
+const initialState = {
+  files: {},
+  status: {},
+  sortBy: "severity",
+  rowLimit: "50",
+  showDiagnostics: false,
+  filterExpr: "",
+  notifications: [],
+};
+
 const reducer = (state, action) => {
   if (!action.type) {
     return state;
@@ -53,6 +63,8 @@ const reducer = (state, action) => {
       return { ...state, status: action.status };
     case "keep_alive":
       return state;
+    case "kill_switch":
+      return initialState;
     case "file":
       return {
         ...state,
@@ -146,16 +158,6 @@ export function useWebSocket(url) {
 
   return { lastMessage, sendJsonMessage };
 }
-
-const initialState = {
-  files: {},
-  status: {},
-  sortBy: "severity",
-  rowLimit: "50",
-  showDiagnostics: false,
-  filterExpr: "",
-  notifications: [],
-};
 
 function SelectSortBy({ sortBy, setSortBy }) {
   return html`
@@ -671,7 +673,10 @@ function App() {
   const KillSwitch = html`<sl-button
     size="small"
     variant="danger"
-    onClick=${() => sendJsonMessage({ type: "kill_switch" })}
+    onClick=${() => {
+      dispatch({ type: "kill_switch" });
+      sendJsonMessage({ type: "kill_switch" });
+    }}
     >Restart</sl-button
   >`;
 
