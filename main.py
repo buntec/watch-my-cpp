@@ -354,8 +354,8 @@ async def compile_files_low_prio(files: Iterable[str]):
 
 def settings_change_should_recompile(old: Settings, new: Settings) -> bool:
     """Return True if the given change of settings requires a recompilation of all sources."""
-    flags_old = [old.iwyu, old.clang_tidy]
-    flags_new = [new.iwyu, new.clang_tidy]
+    flags_old = [old.iwyu, old.clang_tidy, old.cppcheck]
+    flags_new = [new.iwyu, new.clang_tidy, new.cppcheck]
     return any((not o) and n for o, n in zip(flags_old, flags_new))
 
 

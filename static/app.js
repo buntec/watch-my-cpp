@@ -684,7 +684,7 @@ function App() {
     >
       <sl-switch
         disabled=${state.status?.settings ? null : true}
-        checked=${state.status?.settings?.clang_tidy}
+        checked=${state.status?.settings?.iwyu}
         onsl-change=${() => sendJsonMessage({ type: "toggle_iwyu" })}
         size="small"
         >IWYU
@@ -698,7 +698,7 @@ function App() {
     >
       <sl-switch
         disabled=${state.status?.settings ? null : true}
-        checked=${state.status?.settings?.clang_tidy}
+        checked=${state.status?.settings?.cppcheck}
         onsl-change=${() => sendJsonMessage({ type: "toggle_cppcheck" })}
         size="small"
         >Cppcheck
