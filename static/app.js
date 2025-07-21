@@ -256,9 +256,15 @@ function App() {
 
   const levelToInt = (level) => {
     if (level == "error") {
-      return 100;
+      return 100_000;
     }
     if (level == "warning") {
+      return 1000;
+    }
+    if (level == "performance") {
+      return 100;
+    }
+    if (level == "style") {
       return 10;
     }
     return 0;
@@ -389,28 +395,50 @@ function App() {
       ? diags.reduce((acc, diag) => acc + (diag.level == "note" ? 1 : 0), 0)
       : 0;
 
-    const StatusIcon =
+    const styleNotes = diags
+      ? diags.reduce((acc, diag) => acc + (diag.level == "style" ? 1 : 0), 0)
+      : 0;
+
+    const perfNotes = diags
+      ? diags.reduce(
+          (acc, diag) => acc + (diag.level == "performance" ? 1 : 0),
+          0,
+        )
+      : 0;
+
+    const StatusIcons =
       attrs.status == "compiling"
         ? html`<div class="status-symbol"><sl-spinner></sl-spinner></div>`
         : attrs.status == "new"
           ? html`<div class="status-symbol">
               <sl-icon name="question"></sl-icon>
             </div>`
-          : errors > 0
-            ? html`<div class="status-symbol">
-                <sl-icon name="x-octagon"></sl-icon>(${errors})
+          : errors > 0 || warnings > 0 || styleNotes > 0 || perfNotes > 0
+            ? html`<div class="status-symbols">
+                <div class="error">
+                  ${errors > 0 &&
+                  html` <sl-icon name="x-octagon"></sl-icon>(${errors}) `}
+                </div>
+                <div class="warning">
+                  ${warnings > 0 &&
+                  html`
+                    <sl-icon name="exclamation-triangle"></sl-icon>(${warnings})
+                  `}
+                </div>
+                <div class="performance">
+                  ${perfNotes > 0 &&
+                  html` <sl-icon name="speedometer"></sl-icon>(${perfNotes}) `}
+                </div>
+                <div class="style">
+                  ${styleNotes > 0 &&
+                  html`
+                    <sl-icon name="emoji-sunglasses"></sl-icon>(${styleNotes})
+                  `}
+                </div>
               </div>`
-            : warnings > 0
-              ? html`<div class="status-symbol">
-                  <sl-icon name="exclamation-triangle"></sl-icon>(${warnings})
-                </div>`
-              : notes > 0
-                ? html`<div class="status-symbol">
-                    <sl-icon name="info-circle"></sl-icon>(${notes})
-                  </div>`
-                : html`<div class="status-symbol">
-                    <sl-icon name="check2-circle"></sl-icon>
-                  </div>`;
+            : html`<div class="status-symbol">
+                <sl-icon name="check2-circle"></sl-icon>
+              </div>`;
 
     const statusClass =
       attrs.status == "compiling"
@@ -483,7 +511,7 @@ function App() {
               file: file,
             });
           }}
-          >🕵️</sl-button
+          >✔️</sl-button
         ></sl-tooltip
       >
     `;
@@ -546,7 +574,7 @@ function App() {
           ${SourceWithDiagnostics}
         </div>
         <div class="cell actions">${UserActions}</div>
-        <div class="cell status ${statusClass}">${StatusIcon}</div>
+        <div class="cell status ${statusClass}">${StatusIcons}</div>
         <div class="cell compile-time">${attrs.compile_time?.toFixed(2)}</div>
         <div class="cell compile-timestamp">${attrs.compile_timestamp}</div>
       </div>
