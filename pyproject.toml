@@ -24,8 +24,7 @@ build-backend = "hatchling.build"
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
-platforms = ["linux-aarch64"]
-
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 watch-my-cpp = { path = ".", editable = true }
