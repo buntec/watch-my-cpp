@@ -940,7 +940,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 routes = [
     WebSocketRoute("/ws", websocket_endpoint),
-    Mount("/", app=StaticFiles(directory="static", html=True), name="static"),
+    Mount("/", app=StaticFiles(html=True, packages=["watch_my_cpp"]), name="static"),
 ]
 
 
