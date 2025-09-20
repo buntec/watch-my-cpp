@@ -25,8 +25,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket
 from watchfiles import awatch
 
-import lib_iwyu
-from lib import (
+import watch_my_cpp.lib_iwyu as lib_iwyu
+from watch_my_cpp.lib import (
     DEFAULT_MAX_QUEUE,
     CompilerFamily,
     Diagnostic,

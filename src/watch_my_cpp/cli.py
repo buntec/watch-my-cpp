@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 
-from lib import DEFAULT_MAX_QUEUE
+from watch_my_cpp.lib import DEFAULT_MAX_QUEUE
 
 
 def main():
@@ -95,10 +95,6 @@ def main():
     if args.dev:
         cmd.append("--reload")
 
-    cmd.append("main:app")
+    cmd.append("watch_my_cpp.server:app")
 
     subprocess.run(cmd, env=env)
-
-
-if __name__ == "__main__":
-    main()

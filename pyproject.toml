@@ -1,0 +1,42 @@
+[project]
+name = "watch_my_cpp"
+version = "0.1.0"
+description = "A friendly C++ source file watcher"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "pydantic-settings>=2.10.1",
+  "pyright>=1.1.405",
+  "rich>=14.1.0",
+  "ruff>=0.13.1",
+  "starlette>=0.48.0",
+  "uvicorn>=0.36.0",
+  "watchfiles>=1.1.0",
+  "websockets>=15.0.1",
+]
+
+[project.scripts]
+watch-my-cpp = "watch_my_cpp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-aarch64"]
+
+
+[tool.pixi.pypi-dependencies]
+watch-my-cpp = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+clang-tools = ">=21.1.1,<22"
+clang-20 = ">=20.1.8,<21"
+cppcheck = ">=2.18.3,<3"
+treefmt = ">=2.3.1,<3"
+ccache = ">=4.11.3,<5"
+prettier = ">=3.6.2,<4"
+include-what-you-use = ">=0.25,<0.26"
