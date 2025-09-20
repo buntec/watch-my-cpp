@@ -209,9 +209,8 @@ function ToggleDiagnostics({ showDiagnostics, toggleShowDiagnostics }) {
 }
 
 function App() {
-  const { lastMessage, sendJsonMessage } = useWebSocket(
-    "ws://localhost:8000/ws",
-  );
+  const wsUrl = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
+  const { lastMessage, sendJsonMessage } = useWebSocket(wsUrl);
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
