@@ -1,5 +1,5 @@
 [project]
-name = "watch_my_cpp"
+name = "watch-my-cpp"
 version = "0.1.0"
 description = "A friendly C++ source file watcher"
 readme = "README.md"

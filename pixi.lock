@@ -882,7 +882,7 @@ packages:
 - pypi: ./
   name: watch-my-cpp
   version: 0.1.0
-  sha256: 91d2382fee6a60afbab8462c30b0f6e1cbeb98d3437e0eb544f85dc56d73ad39
+  sha256: 1a987da26183a571094136aaf0f481c6b604e5dcce9f66c44e94d9037d9463b6
   requires_dist:
   - pydantic-settings>=2.10.1
   - pyright>=1.1.405
