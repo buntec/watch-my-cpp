@@ -53,6 +53,14 @@ def main():
 
     parser.add_argument("--dev", action="store_true", help="run fastapi in dev mode")
 
+    parser.add_argument(
+        "--port",
+        "-p",
+        type=int,
+        default=8766,
+        help="the port on which the server will listen",
+    )
+
     args = parser.parse_args()
 
     env = os.environ
@@ -90,7 +98,7 @@ def main():
 
     cmd = ["uvicorn"]
 
-    cmd.extend(["--host", "0.0.0.0", "--log-level", "info"])
+    cmd.extend(["--host", "0.0.0.0", "--port", str(args.port), "--log-level", "info"])
 
     if args.dev:
         cmd.append("--reload")
