@@ -25,8 +25,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.websockets import WebSocket
 from watchfiles import awatch
 
-import lib_iwyu
-from lib import (
+import watch_my_cpp.lib_iwyu as lib_iwyu
+from watch_my_cpp.lib import (
     DEFAULT_MAX_QUEUE,
     CompilerFamily,
     Diagnostic,
@@ -940,7 +940,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 routes = [
     WebSocketRoute("/ws", websocket_endpoint),
-    Mount("/", app=StaticFiles(directory="static", html=True), name="static"),
+    Mount("/", app=StaticFiles(html=True, packages=["watch_my_cpp"]), name="static"),
 ]
 
 

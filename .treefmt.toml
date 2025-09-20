@@ -18,3 +18,4 @@ includes = [
   "*.scss",
   "*.ts",
 ]
+excludes = ["src/watch_my_cpp/statics/*"]

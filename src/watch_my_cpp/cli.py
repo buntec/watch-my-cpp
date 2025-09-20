@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 
-from lib import DEFAULT_MAX_QUEUE
+from watch_my_cpp.lib import DEFAULT_MAX_QUEUE
 
 
 def main():
@@ -53,6 +53,14 @@ def main():
 
     parser.add_argument("--dev", action="store_true", help="run fastapi in dev mode")
 
+    parser.add_argument(
+        "--port",
+        "-p",
+        type=int,
+        default=8766,
+        help="the port on which the server will listen",
+    )
+
     args = parser.parse_args()
 
     env = os.environ
@@ -90,15 +98,11 @@ def main():
 
     cmd = ["uvicorn"]
 
-    cmd.extend(["--host", "0.0.0.0", "--log-level", "info"])
+    cmd.extend(["--host", "0.0.0.0", "--port", str(args.port), "--log-level", "info"])
 
     if args.dev:
         cmd.append("--reload")
 
-    cmd.append("main:app")
+    cmd.append("watch_my_cpp.server:app")
 
     subprocess.run(cmd, env=env)
-
-
-if __name__ == "__main__":
-    main()
