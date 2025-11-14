@@ -5,6 +5,7 @@ import itertools
 import json
 import logging
 import os
+import re
 import sys
 import tempfile
 import time
@@ -46,6 +47,7 @@ COMPILER_OPTIONS: dict[CompilerFamily, list[str]] = {
         "-O0",
         "-fno-caret-diagnostics",
         "-fno-color-diagnostics",
+        "-fdiagnostics-color=never",
     ],
     CompilerFamily.GCC: [
         "-O0",
@@ -741,13 +743,14 @@ def init_state(temp_dir: str):
         old_file_path = c["file"]
         new_file_path = os.path.relpath(old_file_path, common_prefix)
         c["file"] = new_file_path
-        old_out = c["output"]
         new_out = os.path.join(temp_dir, os.path.basename(new_file_path) + ".o")
         cmd_old = c["command"]
         icps = extract_include_paths(cmd_old)
         include_paths_by_source[new_file_path] = icps
         include_paths.update(icps)
-        cmd_new = cmd_old.replace(old_out, new_out)
+        out_pattern = r"-o\s+\S+"
+        cmd_new = re.sub(out_pattern, f"-o {new_out}", cmd_old)
+
         c["command"] = wrap_compile_command(cmd_new, cxx_family)
         c["iwyu-command"] = make_iwyu_command(cmd_new)
 
