@@ -156,11 +156,17 @@ def extract_diagnostic(line: str, source: DiagnosticSource) -> Diagnostic | None
     # line = "t.c:3:11: warning: conversion specifies type 'char *' but the argument has type 'int' [-Wformat,Format String]"
 
     # Regular expression to capture file, line, column, level, message, and category
-    pattern = re.compile(r"^(.*?):(\d+):(\d+):\s+(\w+):\s+(.*?)(?:\s+\[([^\]]+)\])?$")
+    pattern = re.compile(
+        r"^(.*?):(\d+):(\d+):\s+([\w\s]+):\s+(.*?)(?:\s+\[([^\]]+)\])?$"
+    )
 
     match = pattern.match(line)
     if match:
         file, line_num, col_num, level, message, category = match.groups()
+        level = level.strip().lower()
+        # TODO: treat fatal errors separately
+        if "fatal" in level:
+            level = "error"
         return Diagnostic(
             file=file,
             file_short=file,
